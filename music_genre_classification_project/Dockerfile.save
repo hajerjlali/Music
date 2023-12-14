@@ -1,0 +1,56 @@
+# Utilisez l'image de base Python
+FROM python:3.8
+
+# Mise à jour des paquets
+RUN apt-get update && apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/*
+
+# Mettre à jour pip
+RUN pip install --upgrade pip
+
+# Installation des dépendances
+RUN pip install --index-url https://pypi.python.org/simple tensorflow
+
+L'erreur `returned a non-zero code: 2` indique qu'il y a eu une erreur lors de l'exécution de la commande `pip install`. Il y a plusieurs raisons possibles à cela.
+
+Voici quelques suggestions pour résoudre le problème :
+
+1. **Problèmes de connectivité :** Assure-toi d'avoir une connexion Internet stable sur la machine où tu exécutes Docker. Si la connexion est instable, la commande `pip install` pourrait échouer.
+
+2. **Problèmes de miroir PyPI :** Le miroir PyPI que tu as spécifié (`https://pypi.python.org/simple`) pourrait ne pas être accessible ou pourrait avoir des problèmes. Essaie d'utiliser le miroir principal en omettant l'option `--index-url` :
+
+   ```Dockerfile
+   # Installation des dépendances
+   RUN pip install tensorflow Pillow numpy scikit-learn keras
+   ```
+
+   Si tu continues à rencontrer des problèmes, essaie de construire l'image Docker sans spécifier de miroir PyPI, car cela utilisera le miroir par défaut.
+
+3. **Problèmes d'espace disque :** Assure-toi que tu as suffisamment d'espace disque disponible sur ton système pour télécharger et installer les dépendances.
+
+4. **Vérification des dépendances :** Vérifie que toutes les dépendances (notamment TensorFlow, Pillow, numpy, scikit-learn, keras) sont correctement spécifiées et compatibles entre elles.
+
+5. **Reconstruction de l'image :** Assure-toi de reconstruire complètement ton image Docker après avoir apporté des modifications au Dockerfile.
+
+   ```bash
+   sudo docker build -t nom_de_ton_image:tag .
+   ```
+
+Si aucune de ces suggestions ne résout le problème, assure-toi de consulter les messages d'erreur complets pour obtenir des informations plus détaillées sur la cause de l'échec de l'installation. Cela pourrait donner des indices supplémentaires sur ce qui ne va pas.
+
+# Définit le répertoire de travail
+WORKDIR /app
+
+RUN pip install flask-cors
+
+# Copie les fichiers nécessaires dans le conteneur
+COPY . /app
+
+# Installe les dépendances
+RUN pip install --timeout=1000  --no-cache-dir -r requirements.txt
+
+# Expose le port nécessaire (facultatif, dépend de votre application)
+EXPOSE 5000
+
+# Définir l'exécution du script de démarrage
+CMD ["python","models/vgg_train.py"]

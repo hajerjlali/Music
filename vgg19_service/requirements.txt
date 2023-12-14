@@ -1,0 +1,6 @@
+Flask==2.2.5
+librosa==0.10.1
+numpy
+soundfile
+scikit-learn==1.2.2
+

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uploader un fichier audio WAV</title>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        input {
+            padding: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #resultContainer,
+        #errorContainer {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        #errorContainer {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Uploader un fichier audio WAV</h1>
+
+    <form id="audioForm" enctype="multipart/form-data">
+        <label for="audioFile">Choisir un fichier audio WAV :</label>
+        <input type="file" id="audioFile" name="audioFile" accept=".wav">
+        <br>
+        <button type="button" onclick="uploadAudio()">Uploader</button>
+    </form>
+
+    <div id="resultContainer">
+        <!-- Zone pour afficher les résultats -->
+    </div>
+<div id="resultContainer2">
+        <!-- Zone pour afficher les résultats -->
+    </div>
+
+    <div id="errorContainer">
+        <!-- Zone pour afficher les messages d'erreur -->
+    </div>
+
+   <script>
+    function uploadAudio() {
+        var fileInput = document.getElementById('audioFile');
+        var file = fileInput.files[0];
+
+        // Vérifie si un fichier est sélectionné
+        if (file) {
+            var formData = new FormData();
+            formData.append('wav_music', file);
+
+            // Envoi de la requête POST au serveur Flask
+            fetch('http://localhost:5000/svm_service', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(results => {
+                // Vérifie si "resultat_prediction" est défini dans l'objet JSON
+                var previousResultsText = results.resultat_prediction ? 'Genre précédent : ' + results.resultat_prediction : 'Aucun résultat précédent disponible'; 
+                // Affiche les résultats précédents dans le conteneur
+                document.getElementById('resultContainer2').innerHTML += '<br>' + previousResultsText;
+
+                // Envoi de la requête GET pour récupérer d'autres résultats
+                fetch('http://localhost:5000/get_result')
+                    .then(response => response.json())
+                    .then(newResults => {
+                        var genre = newResults.resultat_prediction ? 'genre : '+ newResults.resultat_prediction : 'pas de msg';
+                        document.getElementById('resultContainer').innerHTML += '<br>' + genre;
+                    })
+                    .catch(error => {
+                        // Affiche les erreurs de la requête GET
+                        document.getElementById('errorContainer').innerHTML = 'Erreur lors de la récupération des résultats : ' + error.message;
+                    });
+            })
+            .catch(error => {
+                // Affiche les erreurs de la requête POST
+                document.getElementById('errorContainer').innerHTML = 'Erreur lors de l\'envoi de la requête : ' + error.message;
+            });
+        } else {
+            // Affiche un message si aucun fichier n'est sélectionné
+            document.getElementById('errorContainer').innerHTML = 'Veuillez sélectionner un fichier audio WAV.';
+        }
+    }
+</script>
+
+
+
+</body>
+</html>
+
+	
