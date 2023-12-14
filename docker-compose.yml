@@ -1,0 +1,15 @@
+version: '3'
+services:
+   svm_service:
+        build:
+          context: ./music_genre_classification_project
+          dockerfile: ./Dockerfile
+        ports:
+          - "5000:5000"
+        
+   front_service:
+        build:
+          context: ./TestApp
+          dockerfile: ./Dockerfile
+        ports:
+          - "56783:80"
